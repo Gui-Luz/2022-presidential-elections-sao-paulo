@@ -8,13 +8,17 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
     <script src="node_modules/mapbox-gl-infobox/dist/index.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="data/voting.js"></script>
     <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
     <div id="map"></div>
-    <div id="info" class="px-8 py-8 text-violet-800 font-mono my-10 mx-10">
+    <div id="info" class="px-8 py-8 text-violet-800 font-mono  mx-10">
         <div class="my-2 text-lg font-bold">LOCAL DE VOTAÇÃO</div>
         <div id="features" class="text-base"></div>
+    </div>
+    <div id="slider" class="px-8 py-8 text-violet-800 font-mono mx-10">
+        <input id="slider" type="range" min="-100" max="100" step="10" value="0">
     </div>
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoiZ3Vpc2FsIiwiYSI6ImNsYjg3b3UzdDBoaWQzcG8yb2ZzZHAwOXEifQ.-53yFkBrBYgkfE6KcT--Dg';
@@ -29,17 +33,78 @@
 
         map.on('load', () => {
 
-            map.addSource('voting',
+            const lulaObjs = voting.features.filter(object => object.properties.INDICE >= 0);
+            const lulaGeoJson = {
+                "type": "FeatureCollection",
+                "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+                "features": lulaObjs
+                    }
+
+            const bolsonaroObjs = voting.features.filter(object => object.properties.INDICE < 0);
+            const bolsonaroGeoJson = {
+                "type": "FeatureCollection",
+                "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+                "features": bolsonaroObjs
+                    }
+
+            map.addSource('lulaSource',
                 {
                     type: 'geojson',
-                    data: 'data/voting.geojson',
+                    data: lulaGeoJson,
+                }
+            );
+
+            map.addSource('bolsonaroSource',
+                {
+                    type: 'geojson',
+                    data: bolsonaroGeoJson,
                 }
             );
 
             map.addLayer(
                 {
-                    id: 'voting-point',
-                    source: 'voting',
+                    id: 'lulaCircles',
+                    source: 'lulaSource',
+                    type: 'circle',
+                    paint: {
+                        'circle-color': 
+                            [
+                                'interpolate',
+                                ['linear'],
+                                ['get', 'INDICE'],
+                                -100,
+                                '#007f4e',
+                                -80,
+                                '#399849',
+                                -60,
+                                '#56a446',
+                                -40,
+                                '#72b043',
+                                -20,
+                                '#b5be2f',
+                                0,
+                                '#c6b72c',
+                                20,
+                                '#d6af28',
+                                40,
+                                '#f6a020',
+                                60,
+                                '#f37324',
+                                80,
+                                '#ea4d27',
+                                100,
+                                '#e12729',
+                            ],
+                        'circle-opacity': 0.75
+                    }
+                },
+                'road-label'
+            );
+
+            map.addLayer(
+                {
+                    id: 'bolsonaroCircles',
+                    source: 'bolsonaroSource',
                     type: 'circle',
                     paint: {
                         'circle-color': 
@@ -79,7 +144,7 @@
 
         map.on('click', (e) => {
             const [ features ] = map.queryRenderedFeatures(e.point,{
-                layers:['voting-point']
+                layers:['bolsonaroCircles', 'lulaCircles']
             });
 
             if (features) {
