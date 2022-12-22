@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>São Paulo Presidential Elections</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+    <script src="node_modules/mapbox-gl-infobox/dist/index.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style/style.css">
+</head>
+<body>
+    <div id="map"></div>
+    <div id="info" class="px-8 py-8 text-violet-800 font-mono my-10 mx-10">
+        <div class="my-2 text-lg font-bold">LOCAL DE VOTAÇÃO</div>
+        <div id="features" class="text-base"></div>
+    </div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZ3Vpc2FsIiwiYSI6ImNsYjg3b3UzdDBoaWQzcG8yb2ZzZHAwOXEifQ.-53yFkBrBYgkfE6KcT--Dg';
+        
+        const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/dark-v10',
+        center: [-46.633066, -23.550823],
+        zoom: 10,
+        projection: 'globe'
+        });
+
+        map.on('load', () => {
+
+            map.addSource('voting',
+                {
+                    type: 'geojson',
+                    data: 'data/voting.geojson',
+                }
+            );
+
+            map.addLayer(
+                {
+                    id: 'voting-point',
+                    source: 'voting',
+                    type: 'circle',
+                    paint: {
+                        'circle-color': 
+                            [
+                                'interpolate',
+                                ['linear'],
+                                ['get', 'INDICE'],
+                                -100,
+                                '#007f4e',
+                                -80,
+                                '#399849',
+                                -60,
+                                '#56a446',
+                                -40,
+                                '#72b043',
+                                -20,
+                                '#b5be2f',
+                                0,
+                                '#c6b72c',
+                                20,
+                                '#d6af28',
+                                40,
+                                '#f6a020',
+                                60,
+                                '#f37324',
+                                80,
+                                '#ea4d27',
+                                100,
+                                '#e12729',
+                            ],
+                        'circle-opacity': 0.75
+                    }
+                },
+                'road-label'
+            );
+        })
+
+        map.on('click', (e) => {
+            const [ features ] = map.queryRenderedFeatures(e.point,{
+                layers:['voting-point']
+            });
+
+            if (features) {
+                console.log(features)
+                console.log(features.properties.END_LV)
+                document.getElementById('features').innerHTML = `
+                <div>
+                    <p>TIPO: ${features.properties.LV_TIPO}</p>
+                    <p>NOME: ${features.properties.NOME_LV}</p>
+                    <p>ENDEREÇO: ${features.properties.END_LV}</p>
+                    <p>MUNICÍPIO: ${features.properties.MUN_NOME}</p>
+                    <p>LULA: ${features.properties.PS22_213} votos</p>
+                    <p>BOLSONARO: ${features.properties.PS22_222} votos</p>
+                    <p>ÍNDICE: ${features.properties.INDICE}</p>
+                <div>
+                `
+            }
+        });
+
+    </script>
+</body>
+</html>
