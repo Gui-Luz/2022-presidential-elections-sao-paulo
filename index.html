@@ -13,12 +13,13 @@
 </head>
 <body>
     <div id="map"></div>
-    <div id="info" class="px-8 py-8 text-violet-800 font-mono  mx-10">
-        <div class="my-2 text-lg font-bold">LOCAL DE VOTAÇÃO</div>
-        <div id="features" class="text-base"></div>
-    </div>
-    <div id="slider" class="px-8 py-8 text-violet-800 font-mono mx-10">
-        <input id="slider" type="range" min="-100" max="100" step="10" value="0">
+    <div id="main" class ="absolute w-1/4 top-0 right-0 my-5 mx-5">
+        <div id="info" class="relative right-0 overflow-auto rounded shadow-sm px-4 py-4 text-violet-800 font-mono my-2 mx-2">
+            <div class="my-1 text-sm font-bold">LOCAL DE VOTAÇÃO</div>
+            <div id="features" class="text-xs"></div>
+        </div>
+        <div id="menu" class="relative rounded shadow-sm px-4 py-4 my-2 mx-2 text-violet-800 font-mono">
+        </div>
     </div>
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoiZ3Vpc2FsIiwiYSI6ImNsYjg3b3UzdDBoaWQzcG8yb2ZzZHAwOXEifQ.-53yFkBrBYgkfE6KcT--Dg';
@@ -66,22 +67,15 @@
                     id: 'lulaCircles',
                     source: 'lulaSource',
                     type: 'circle',
+                    layout: {
+                        'visibility': 'visible'
+                    },
                     paint: {
                         'circle-color': 
                             [
                                 'interpolate',
                                 ['linear'],
                                 ['get', 'INDICE'],
-                                -100,
-                                '#007f4e',
-                                -80,
-                                '#399849',
-                                -60,
-                                '#56a446',
-                                -40,
-                                '#72b043',
-                                -20,
-                                '#b5be2f',
                                 0,
                                 '#c6b72c',
                                 20,
@@ -106,6 +100,9 @@
                     id: 'bolsonaroCircles',
                     source: 'bolsonaroSource',
                     type: 'circle',
+                    layout: {
+                        'visibility': 'visible'
+                    },
                     paint: {
                         'circle-color': 
                             [
@@ -124,16 +121,6 @@
                                 '#b5be2f',
                                 0,
                                 '#c6b72c',
-                                20,
-                                '#d6af28',
-                                40,
-                                '#f6a020',
-                                60,
-                                '#f37324',
-                                80,
-                                '#ea4d27',
-                                100,
-                                '#e12729',
                             ],
                         'circle-opacity': 0.75
                     }
@@ -163,6 +150,65 @@
                 `
             }
         });
+
+        map.on('idle', () => {
+            // If these two layers were not added to the map, abort
+            if (!map.getLayer('lulaCircles') || !map.getLayer('bolsonaroCircles')) {
+                return;
+            }
+            
+            // Enumerate ids of the layers.
+            const toggleableLayerIds = ['lulaCircles', 'bolsonaroCircles'];
+            
+            // Set up the corresponding toggle button for each layer.
+            for (const id of toggleableLayerIds) {
+                // Skip layers that already have a button set up.
+                if (document.getElementById(id)) {
+                    continue;
+                }
+            
+            // Create a link.
+                const link = document.createElement('a');
+                link.id = id;
+                link.href = '#';
+                if (id == 'lulaCircles') {
+                    link.textContent = 'ONDE LULA GANHOU';
+                }else{
+                    link.textContent = 'ONDE BOLSONARO GANHOU'
+                }
+                const active_button = 'rounded my-2 mx-6 py-2 px-2 bg-yellow-200 text-center text-sm block hover:outline outline-2';
+                const inactive_button = 'rounded my-2 mx-6 py-2 px-2 bg-yellow-50 text-center text-sm block hover:outline outline-2';
+                link.className = active_button;
+                
+                // Show or hide layer when the toggle is clicked.
+                link.onclick = function (e) {
+                    const clickedLayer = this.id;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const visibility = map.getLayoutProperty(
+                    clickedLayer,
+                    'visibility'
+                    );
+                    
+                    // Toggle layer visibility by changing the layout object's visibility property.
+                    if (visibility === 'visible') {
+                        map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+                        this.className = inactive_button;
+                        } else {
+                        this.className = active_button;
+                        map.setLayoutProperty(
+                        clickedLayer,
+                        'visibility',
+                        'visible'
+                        );
+                    }   
+                };
+            
+            const layers = document.getElementById('menu');
+            layers.appendChild(link);
+            }
+        })
 
     </script>
 </body>
