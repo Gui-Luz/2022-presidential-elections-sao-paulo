@@ -9,6 +9,7 @@
     <script src="node_modules/mapbox-gl-infobox/dist/index.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="data/voting.js"></script>
+    <script src="mapbox_key.js"></script>
     <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
@@ -22,7 +23,7 @@
         </div>
     </div>
     <script>
-        mapboxgl.accessToken = 'pk.eyJ1IjoiZ3Vpc2FsIiwiYSI6ImNsYjg3b3UzdDBoaWQzcG8yb2ZzZHAwOXEifQ.-53yFkBrBYgkfE6KcT--Dg';
+        mapboxgl.accessToken = mapbox_key
         
         const map = new mapboxgl.Map({
         container: 'map',
@@ -68,9 +69,10 @@
                     source: 'lulaSource',
                     type: 'circle',
                     layout: {
-                        'visibility': 'visible'
+                        'visibility': 'visible',
                     },
                     paint: {
+                        'circle-radius': 5,
                         'circle-color': 
                             [
                                 'interpolate',
@@ -104,6 +106,7 @@
                         'visibility': 'visible'
                     },
                     paint: {
+                        'circle-radius': 5,
                         'circle-color': 
                             [
                                 'interpolate',
@@ -176,8 +179,8 @@
                 }else{
                     link.textContent = 'ONDE BOLSONARO GANHOU'
                 }
-                const active_button = 'rounded my-2 mx-6 py-2 px-2 bg-yellow-200 text-center text-sm block hover:outline outline-2';
-                const inactive_button = 'rounded my-2 mx-6 py-2 px-2 bg-yellow-50 text-center text-sm block hover:outline outline-2';
+                const active_button = 'rounded my-2 mx-12 py-2 px-2 bg-yellow-200 text-center text-sm block hover:outline outline-2';
+                const inactive_button = 'rounded my-2 mx-12 py-2 px-2 bg-yellow-50 text-center text-sm block hover:outline outline-2';
                 link.className = active_button;
                 
                 // Show or hide layer when the toggle is clicked.
