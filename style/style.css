@@ -6,11 +6,11 @@ body {
     position: absolute; 
     top: 0; 
     bottom: 0; 
-    width: 100%; 
+    width: 100%;
 }
 
 #map canvas {
-    cursor: crosshair;
+    cursor: grabbing;
     }
 
 #main {
@@ -32,6 +32,3 @@ body {
 #menu a:hover {
     
     }
-
- 
-

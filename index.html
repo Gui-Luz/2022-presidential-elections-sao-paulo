@@ -6,18 +6,24 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.js"></script>
     <script src="node_modules/mapbox-gl-infobox/dist/index.js"></script>
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="data/voting.js"></script>
     <script src="mapbox_key.js"></script>
     <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
-    <div id="map"></div>
+    <div id="map" class="text-violet-800"></div>
     <div id="main" class ="absolute w-1/4 top-0 right-0 my-5 mx-5">
         <div id="info" class="relative right-0 overflow-auto rounded shadow-sm px-4 py-4 text-violet-800 font-mono my-2 mx-2">
             <div class="my-1 text-sm font-bold">LOCAL DE VOTAÇÃO</div>
             <div id="features" class="text-xs"></div>
+        </div>
+        <div id="info" class="relative right-0 overflow-auto rounded shadow-sm px-4 py-4 text-violet-800 font-mono my-2 mx-2">
+            <div class="my-1 text-sm font-bold">ÁREA RESUMO</div>
+            <div id="poligono-resumo" class="text-xs"></div>
         </div>
         <div id="menu" class="relative rounded shadow-sm px-4 py-4 my-2 mx-2 text-violet-800 font-mono">
         </div>
@@ -32,6 +38,19 @@
         zoom: 10,
         projection: 'globe'
         });
+
+        const draw = new MapboxDraw({
+            displayControlsDefault: false,
+            controls: {
+                polygon: true,
+                trash: true
+            },
+            defaultMode: 'simple_select'
+            });
+        map.addControl(draw, 'top-left');
+        map.on('draw.create', createPolygon);
+        map.on('draw.delete', createPolygon);
+        map.on('draw.update', createPolygon);
 
         map.on('load', () => {
 
@@ -138,8 +157,6 @@
             });
 
             if (features) {
-                console.log(features)
-                console.log(features.properties.END_LV)
                 document.getElementById('features').innerHTML = `
                 <div>
                     <p>TIPO: ${features.properties.LV_TIPO}</p>
@@ -211,7 +228,46 @@
             const layers = document.getElementById('menu');
             layers.appendChild(link);
             }
-        })
+        });
+
+        function createPolygon() {
+            const data = draw.getAll();
+            const answer = document.getElementById('calculated-area');
+            var lv_sum = 0;
+            var lula_sum = 0;
+            var bolsonaro_sum = 0;
+            if (data.features.length > 0) {
+                var poly = turf.polygon([data['features'][0]['geometry']['coordinates'][0]]);
+                voting.features.forEach(element => {
+                    var point = turf.point(element.geometry.coordinates);
+                    if (turf.inside(point, poly)) {
+                        lv_sum += 1
+                        lula_sum += element.properties.PS22_213;
+                        bolsonaro_sum += element.properties.PS22_222;
+                    }
+                });
+            var voting_sum = lula_sum + bolsonaro_sum;
+            var perc_lula = lula_sum / (voting_sum / 100);
+            var perc_bolsonaro = bolsonaro_sum / (voting_sum / 100);
+            var indice_sum = perc_lula - perc_bolsonaro;
+
+            document.getElementById('poligono-resumo').innerHTML = `
+                <div>
+                    <p>LOCAIS DE VOTAÇÃO: ${lv_sum}</p>
+                    <p>VOTOS LULA: ${lula_sum}</p>
+                    <p>VOTOS BOLSONARO: ${bolsonaro_sum}</p>
+                    <p>ÍNDICE: ${indice_sum}</p>
+                <div>
+                `
+
+            console.log(lv_sum);
+            console.log(lula_sum);
+            console.log(bolsonaro_sum);
+            console.log(perc_lula);
+            console.log(perc_bolsonaro);
+            console.log(indice_sum);
+            }
+        }
 
     </script>
 </body>
