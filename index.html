@@ -29,6 +29,12 @@
         <div id="menu" class="relative rounded shadow-sm px-4 py-4 my-2 mx-2 text-violet-800 font-mono">
         </div>
     </div>
+    <div id="legend" class="absolute bottom-0 left-0 my-8 mx-8 w-1/6 rounded">
+        <div class="relative rounded bg-gradient-to-l from-red-600/80 via-yellow-600/80 to-green-600/80 flex justify-evenly place-content-stretch">
+            <p class="font-mono text-violet-200 text-xs inline-block">+ Bolsonaro</p>
+            <p class="font-mono text-violet-200 text-xs inline-block">+ Lula</p>
+        </div>
+    </div>
     <script>
         mapboxgl.accessToken = mapbox_key
         
@@ -48,6 +54,7 @@
             },
             defaultMode: 'draw_polygon'
             });
+
         map.addControl(draw, 'top-left');
         map.on('draw.create', createPolygon);
         map.on('draw.delete', createPolygon);
@@ -284,37 +291,6 @@
                 `
             }else{
                 document.getElementById('poligono-resumo').innerHTML = ``
-            }
-        };
-
-        function deletePolygon() {
-            const data = draw.getAll();
-            if (data.features.length > 0) {
-                var lv_sum = 0;
-                var lula_sum = 0;
-                var bolsonaro_sum = 0;
-                var poly = turf.polygon([data['features'][0]['geometry']['coordinates'][0]]);
-                voting.features.forEach(element => {
-                    var point = turf.point(element.geometry.coordinates);
-                    if (turf.inside(point, poly)) {
-                        lv_sum += 1
-                        lula_sum += element.properties.PS22_213;
-                        bolsonaro_sum += element.properties.PS22_222;
-                    }
-                });
-            var voting_sum = lula_sum + bolsonaro_sum;
-            var perc_lula = lula_sum / (voting_sum / 100);
-            var perc_bolsonaro = bolsonaro_sum / (voting_sum / 100);
-            var indice_sum = perc_lula - perc_bolsonaro;
-
-            document.getElementById('poligono-resumo').innerHTML = `
-                <div>
-                    <p>LOCAIS DE VOTAÇÃO: ${lv_sum}</p>
-                    <p>VOTOS LULA: ${lula_sum}</p>
-                    <p>VOTOS BOLSONARO: ${bolsonaro_sum}</p>
-                    <p>ÍNDICE: ${indice_sum}</p>
-                <div>
-                `
             }
         };
 
