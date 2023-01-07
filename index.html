@@ -5,6 +5,7 @@
     <title>São Paulo Presidential Elections</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.css" type="text/css">
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.js"></script>
     <script src="node_modules/mapbox-gl-infobox/dist/index.js"></script>
@@ -45,7 +46,7 @@
                 polygon: true,
                 trash: true
             },
-            defaultMode: 'simple_select'
+            defaultMode: 'draw_polygon'
             });
         map.addControl(draw, 'top-left');
         map.on('draw.create', createPolygon);
@@ -72,6 +73,7 @@
                 {
                     type: 'geojson',
                     data: lulaGeoJson,
+                    generateId: true
                 }
             );
 
@@ -79,6 +81,7 @@
                 {
                     type: 'geojson',
                     data: bolsonaroGeoJson,
+                    generateId: true
                 }
             );
 
@@ -91,7 +94,6 @@
                         'visibility': 'visible',
                     },
                     paint: {
-                        'circle-radius': 5,
                         'circle-color': 
                             [
                                 'interpolate',
@@ -110,7 +112,13 @@
                                 100,
                                 '#e12729',
                             ],
-                        'circle-opacity': 0.75
+                        'circle-opacity': 0.75,
+                        'circle-radius': [
+                            'case',
+                            ['boolean', ['feature-state', 'hover'], false],
+                            10,
+                            5
+                        ]
                     }
                 },
                 'road-label'
@@ -125,7 +133,6 @@
                         'visibility': 'visible'
                     },
                     paint: {
-                        'circle-radius': 5,
                         'circle-color': 
                             [
                                 'interpolate',
@@ -144,12 +151,26 @@
                                 0,
                                 '#c6b72c',
                             ],
-                        'circle-opacity': 0.75
+                        'circle-opacity': 0.75,
+                        'circle-radius': [
+                            'case',
+                            ['boolean', ['feature-state', 'hover'], false],
+                            10,
+                            5
+                        ]
                     }
                 },
                 'road-label'
             );
-        })
+        });
+        
+        map.on('mouseenter', ['bolsonaroCircles', 'lulaCircles'], () => {
+            map.getCanvas().style.cursor = 'crosshair'
+            });
+
+        map.on('mouseleave', ['bolsonaroCircles', 'lulaCircles'], () => {
+            map.getCanvas().style.cursor = 'grabbing'
+            });
 
         map.on('click', (e) => {
             const [ features ] = map.queryRenderedFeatures(e.point,{
@@ -232,11 +253,46 @@
 
         function createPolygon() {
             const data = draw.getAll();
-            const answer = document.getElementById('calculated-area');
-            var lv_sum = 0;
-            var lula_sum = 0;
-            var bolsonaro_sum = 0;
             if (data.features.length > 0) {
+                var lv_sum = 0;
+                var lula_sum = 0;
+                var bolsonaro_sum = 0;
+                var features = data['features'];
+                features.forEach(feature => {
+                    var poly = turf.polygon([feature['geometry']['coordinates'][0]]);
+                    voting.features.forEach(element => {
+                        var point = turf.point(element.geometry.coordinates);
+                        if (turf.inside(point, poly)) {
+                            lv_sum += 1
+                            lula_sum += element.properties.PS22_213;
+                            bolsonaro_sum += element.properties.PS22_222;
+                        }
+                    });
+                })
+            var voting_sum = lula_sum + bolsonaro_sum;
+            var perc_lula = lula_sum / (voting_sum / 100);
+            var perc_bolsonaro = bolsonaro_sum / (voting_sum / 100);
+            var indice_sum = perc_lula - perc_bolsonaro;
+
+            document.getElementById('poligono-resumo').innerHTML = `
+                <div>
+                    <p>LOCAIS DE VOTAÇÃO: ${lv_sum}</p>
+                    <p>VOTOS LULA: ${lula_sum}</p>
+                    <p>VOTOS BOLSONARO: ${bolsonaro_sum}</p>
+                    <p>ÍNDICE: ${indice_sum}</p>
+                <div>
+                `
+            }else{
+                document.getElementById('poligono-resumo').innerHTML = ``
+            }
+        };
+
+        function deletePolygon() {
+            const data = draw.getAll();
+            if (data.features.length > 0) {
+                var lv_sum = 0;
+                var lula_sum = 0;
+                var bolsonaro_sum = 0;
                 var poly = turf.polygon([data['features'][0]['geometry']['coordinates'][0]]);
                 voting.features.forEach(element => {
                     var point = turf.point(element.geometry.coordinates);
@@ -259,15 +315,8 @@
                     <p>ÍNDICE: ${indice_sum}</p>
                 <div>
                 `
-
-            console.log(lv_sum);
-            console.log(lula_sum);
-            console.log(bolsonaro_sum);
-            console.log(perc_lula);
-            console.log(perc_bolsonaro);
-            console.log(indice_sum);
             }
-        }
+        };
 
     </script>
 </body>
