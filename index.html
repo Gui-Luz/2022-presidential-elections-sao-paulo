@@ -29,7 +29,7 @@
         <div id="menu" class="relative rounded shadow-sm px-4 py-4 my-2 mx-2 text-violet-800 font-mono">
         </div>
     </div>
-    <div id="legend" class="absolute bottom-0 left-0 my-8 mx-8 w-1/6 rounded">
+    <div id="legend" class="absolute bottom-0 left-0 my-12 mx-4 w-1/6 rounded">
         <div class="relative rounded bg-gradient-to-l from-red-600/80 via-yellow-600/80 to-green-600/80 flex justify-evenly place-content-stretch">
             <p class="font-mono text-violet-200 text-xs inline-block">+ Bolsonaro</p>
             <p class="font-mono text-violet-200 text-xs inline-block">+ Lula</p>
@@ -185,6 +185,10 @@
             });
 
             if (features) {
+                map.flyTo({
+                    center: [e.lngLat.lng, e.lngLat.lat],
+                    zoom: 13
+                });
                 document.getElementById('features').innerHTML = `
                 <div>
                     <p>TIPO: ${features.properties.LV_TIPO}</p>
@@ -196,6 +200,8 @@
                     <p>ÍNDICE: ${features.properties.INDICE}</p>
                 <div>
                 `
+            }else{
+                document.getElementById('features').innerHTML = ``
             }
         });
 
