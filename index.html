@@ -54,6 +54,8 @@
             },
             defaultMode: 'draw_polygon'
             });
+        
+        var clickedFeature = {'id': null, 'source': null}
 
         map.addControl(draw, 'top-left');
         map.on('draw.create', createPolygon);
@@ -122,7 +124,7 @@
                         'circle-opacity': 0.75,
                         'circle-radius': [
                             'case',
-                            ['boolean', ['feature-state', 'hover'], false],
+                            ['boolean', ['feature-state', 'clicked'], false],
                             10,
                             5
                         ]
@@ -161,7 +163,7 @@
                         'circle-opacity': 0.75,
                         'circle-radius': [
                             'case',
-                            ['boolean', ['feature-state', 'hover'], false],
+                            ['boolean', ['feature-state', 'clicked'], false],
                             10,
                             5
                         ]
@@ -180,6 +182,17 @@
             });
 
         map.on('click', (e) => {
+            if (clickedFeature.id != null) {
+                map.setFeatureState(
+                        {
+                        source: clickedFeature.source,
+                        id: clickedFeature.id
+                        },
+                        {
+                        clicked: false
+                        }
+                    );
+            }
             const [ features ] = map.queryRenderedFeatures(e.point,{
                 layers:['bolsonaroCircles', 'lulaCircles']
             });
@@ -189,6 +202,17 @@
                     center: [e.lngLat.lng, e.lngLat.lat],
                     zoom: 13
                 });
+                clickedFeature['id'] = features.id;
+                clickedFeature['source'] = features.layer.source;
+                map.setFeatureState(
+                    {
+                    source: clickedFeature.source,
+                    id: clickedFeature.id
+                    },
+                    {
+                    clicked: true
+                    }
+                );
                 document.getElementById('features').innerHTML = `
                 <div>
                     <p>TIPO: ${features.properties.LV_TIPO}</p>
