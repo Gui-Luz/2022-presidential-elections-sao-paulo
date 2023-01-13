@@ -43,7 +43,7 @@
         style: 'mapbox://styles/mapbox/dark-v10',
         center: [-46.633066, -23.550823],
         zoom: 10,
-        projection: 'globe'
+        projection: 'mercator'
         });
 
         const draw = new MapboxDraw({
@@ -52,7 +52,7 @@
                 polygon: true,
                 trash: true
             },
-            defaultMode: 'draw_polygon'
+            defaultMode: 'simple_select'
             });
         
         var clickedFeature = {'id': null, 'source': null}
