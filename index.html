@@ -64,14 +64,14 @@
 
         map.on('load', () => {
 
-            const lulaObjs = voting.features.filter(object => object.properties.INDICE >= 0);
+            const lulaObjs = voting.features.filter(object => object.properties.INDICE_2022 >= 0);
             const lulaGeoJson = {
                 "type": "FeatureCollection",
                 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
                 "features": lulaObjs
                     }
 
-            const bolsonaroObjs = voting.features.filter(object => object.properties.INDICE < 0);
+            const bolsonaroObjs = voting.features.filter(object => object.properties.INDICE_2022 < 0);
             const bolsonaroGeoJson = {
                 "type": "FeatureCollection",
                 "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
@@ -107,7 +107,7 @@
                             [
                                 'interpolate',
                                 ['linear'],
-                                ['get', 'INDICE'],
+                                ['get', 'INDICE_2022'],
                                 0,
                                 '#c6b72c',
                                 20,
@@ -146,7 +146,7 @@
                             [
                                 'interpolate',
                                 ['linear'],
-                                ['get', 'INDICE'],
+                                ['get', 'INDICE_2022'],
                                 -100,
                                 '#007f4e',
                                 -80,
@@ -219,9 +219,9 @@
                     <p>NOME: ${features.properties.NOME_LV}</p>
                     <p>ENDEREÇO: ${features.properties.END_LV}</p>
                     <p>MUNICÍPIO: ${features.properties.MUN_NOME}</p>
-                    <p>LULA: ${features.properties.PS22_213} votos</p>
-                    <p>BOLSONARO: ${features.properties.PS22_222} votos</p>
-                    <p>ÍNDICE: ${features.properties.INDICE}</p>
+                    <p>LULA: ${features.properties.VOTOS_LULA_2022} votos</p>
+                    <p>BOLSONARO: ${features.properties.VOTOS_BOLSONARO_2022} votos</p>
+                    <p>ÍNDICE: ${features.properties.INDICE_2022}</p>
                 <div>
                 `
             }else{
@@ -301,8 +301,8 @@
                         var point = turf.point(element.geometry.coordinates);
                         if (turf.inside(point, poly)) {
                             lv_sum += 1
-                            lula_sum += element.properties.PS22_213;
-                            bolsonaro_sum += element.properties.PS22_222;
+                            lula_sum += element.properties.VOTOS_LULA_2022;
+                            bolsonaro_sum += element.properties.VOTOS_BOLSONARO_2022;
                         }
                     });
                 })
