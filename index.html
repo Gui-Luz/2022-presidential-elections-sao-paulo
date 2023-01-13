@@ -10,9 +10,12 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.js"></script>
     <script src="node_modules/mapbox-gl-infobox/dist/index.js"></script>
     <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+    <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="data/voting.js"></script>
     <script src="mapbox_key.js"></script>
+    <script src="./helpers/addGraph.js"></script>
+    <script src="./helpers/calculateGraphValues.js"></script>
     <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
@@ -21,6 +24,7 @@
         <div id="info" class="relative right-0 overflow-auto rounded shadow-sm px-4 py-4 text-violet-800 font-mono my-2 mx-2">
             <div class="my-1 text-sm font-bold">LOCAL DE VOTAÇÃO</div>
             <div id="features" class="text-xs"></div>
+            <div id="graph" class="px-5 py-5 flex justify-center"></div>
         </div>
         <div id="info" class="relative right-0 overflow-auto rounded shadow-sm px-4 py-4 text-violet-800 font-mono my-2 mx-2">
             <div class="my-1 text-sm font-bold">ÁREA RESUMO</div>
@@ -56,6 +60,7 @@
             });
         
         var clickedFeature = {'id': null, 'source': null}
+        var graph = false
 
         map.addControl(draw, 'top-left');
         map.on('draw.create', createPolygon);
@@ -223,9 +228,29 @@
                     <p>BOLSONARO: ${features.properties.VOTOS_BOLSONARO_2022} votos</p>
                     <p>ÍNDICE: ${features.properties.INDICE_2022}</p>
                 <div>
-                `
+                `;
+                if (graph == false) {
+                    var value = calculateGraphValues(features.properties.VOTOS_LULA_2022_PERC,
+                                                    features.properties.VOTOS_BOLSONARO_2022_PERC,
+                                                    features.properties.VOTOS_LULA_2018_PERC,
+                                                    features.properties.VOTOS_BOLSONARO_2018_PERC)
+                    //var value = [50,0,10,40];
+                    let {data, layout} = generateGraph(value);
+                    Plotly.react('graph', data, layout);
+                    graph = true
+                }else{
+                    var value = calculateGraphValues(features.properties.VOTOS_LULA_2022_PERC,
+                                                    features.properties.VOTOS_BOLSONARO_2022_PERC,
+                                                    features.properties.VOTOS_LULA_2018_PERC,
+                                                    features.properties.VOTOS_BOLSONARO_2018_PERC)
+                    //var value = [50,0,10,40]
+                    let {data, layout} = generateGraph(value)
+                    Plotly.newPlot('graph', data, layout)
+                }
             }else{
-                document.getElementById('features').innerHTML = ``
+                document.getElementById('features').innerHTML = ``;
+                document.getElementById('graph').innerHTML = ``;
+                graph = true
             }
         });
 
