@@ -233,16 +233,14 @@
                                                     features.properties.VOTOS_BOLSONARO_2018_PERC,
                                                     features.properties.VOTOS_LULA_2022_PERC,
                                                     features.properties.VOTOS_BOLSONARO_2022_PERC)
-                    //var value = [50,0,10,40];
                     let {data, layout} = generateGraph(value);
                     Plotly.react('graph', data, layout);
                     graph = true
                 }else{
-                    var value = calculateGraphValues(features.properties.VOTOS_LULA_2022_PERC,
-                                                    features.properties.VOTOS_BOLSONARO_2022_PERC,
-                                                    features.properties.VOTOS_LULA_2018_PERC,
-                                                    features.properties.VOTOS_BOLSONARO_2018_PERC)
-                    //var value = [50,0,10,40]
+                    var value = calculateGraphValues(features.properties.VOTOS_LULA_2018_PERC,
+                                                    features.properties.VOTOS_BOLSONARO_2018_PERC,
+                                                    features.properties.VOTOS_LULA_2022_PERC,
+                                                    features.properties.VOTOS_BOLSONARO_2022_PERC)
                     let {data, layout} = generateGraph(value)
                     Plotly.newPlot('graph', data, layout)
                 }
