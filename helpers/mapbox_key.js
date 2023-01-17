@@ -1,1 +1,1 @@
-const mapbox_key = "ppk.eyJ1IjoiZ3Vpc2FsIiwiYSI6ImNsZDBocnUzcjI3azQzd3JsdHJhYmY0MWMifQ.f4wXsehl5aPt2m1pS383EA"
+const mapbox_key = "pk.eyJ1IjoiZ3Vpc2FsIiwiYSI6ImNsZDBocnUzcjI3azQzd3JsdHJhYmY0MWMifQ.f4wXsehl5aPt2m1pS383EA"
