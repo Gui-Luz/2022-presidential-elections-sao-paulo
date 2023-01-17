@@ -1,9 +1,5 @@
 function calculateGraphValues(x1,y1,x2,y2) {
-    //x1 = 50
-    //y1 = 50
-    //x2 = 60
-    //y2 = 40
-
+    
     v1 = x1 - x2;
     v2 = y1 - y2;
 
